@@ -7,6 +7,10 @@
 `Electron` · `Python` · `Vosk` · `SQLite` · `vanilla JS`
 **Fully offline core. No cloud required. Your data never leaves your machine.**
 
+### ▶ [Watch the 90-second demo](assets/dexter-demo.mp4)
+
+https://github.com/DexterDebugs/dexter/raw/main/assets/dexter-demo.mp4
+
 </div>
 
 ---
