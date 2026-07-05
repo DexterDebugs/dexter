@@ -1,0 +1,32 @@
+# dependencies / build
+node_modules/
+release/
+dist/
+
+# LOCAL DATA & SECRETS — never commit (API keys + personal placement data)
+.data-backup/
+*.log
+
+# personal Notion page IDs + TMAY / interview answers
+scripts/import-notion-trackers.js
+# private workspace database/page IDs
+docs/NOTION_MAP.md
+# personal seed history (real daily logs, ratings, reflections)
+lib/seed-data.js
+scripts/seed.js
+
+# large offline models / indexes (users download / generate their own)
+voice/model/
+vosk-model/
+brain/index.db
+
+# editor / OS cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.agents/
+
+# python bytecode
+__pycache__/
+*.pyc

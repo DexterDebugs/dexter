@@ -1,0 +1,21 @@
+{
+  "name": "dexter",
+  "version": "0.1.0",
+  "description": "DEXTER — personal placement & life assistant",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "dev.dexter.app",
+    "productName": "Dexter",
+    "directories": { "output": "release" },
+    "files": ["main.js", "preload.js", "lib/**", "src/**", "assets/**", "voice/*.py", "dictate/*.py", "brain/*.py", "context/*.py"],
+    "win": { "target": "nsis", "icon": "assets/dexter.ico" }
+  }
+}

@@ -1,0 +1,33 @@
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('dexter', {
+  readStore: () => ipcRenderer.invoke('store:read'),
+  writeStore: (data) => ipcRenderer.invoke('store:write', data),
+  fetchLeetCode: (username) => ipcRenderer.invoke('leetcode:fetch', username),
+  setAutostart: (enabled) => ipcRenderer.invoke('autostart:set', enabled),
+  notionPull: (token, dbId) => ipcRenderer.invoke('notion:pull', { token, dbId }),
+  notionPush: (token, dbId, properties) => ipcRenderer.invoke('notion:push', { token, dbId, properties }),
+  voiceStart: () => ipcRenderer.invoke('voice:start'),
+  voiceStop: () => ipcRenderer.invoke('voice:stop'),
+  onVoice: (cb) => ipcRenderer.on('voice:event', (_e, msg) => cb(msg)),
+  dictateStart: () => ipcRenderer.invoke('dictate:start'),
+  dictateStop: () => ipcRenderer.invoke('dictate:stop'),
+  onDictate: (cb) => ipcRenderer.on('dictate:event', (_e, msg) => cb(msg)),
+  fetchNews: () => ipcRenderer.invoke('news:fetch'),
+  launchApp: (query) => ipcRenderer.invoke('apps:launch', query),
+  askLlm: (apiKey, system, text) => ipcRenderer.invoke('llm:ask', { apiKey, system, text }),
+  askGemini: (apiKey, system, text) => ipcRenderer.invoke('llm:gemini', { apiKey, system, text }),
+  githubProject: (repo, token) => ipcRenderer.invoke('github:project', { repo, token }),
+  notionBlocks: (token, blockId) => ipcRenderer.invoke('notion:blocks', { token, blockId }),
+  brainIndex: (vaultPath) => ipcRenderer.invoke('brain:index', vaultPath),
+  brainQuery: (q, k) => ipcRenderer.invoke('brain:query', { q, k }),
+  clipRing: () => ipcRenderer.invoke('clip:ring'),
+  clipCopy: (text) => ipcRenderer.invoke('clip:copy', text),
+  calToday: (icsUrl) => ipcRenderer.invoke('cal:today', icsUrl),
+  contextStart: () => ipcRenderer.invoke('context:start'),
+  contextStop: () => ipcRenderer.invoke('context:stop'),
+  contextLookup: (hhmm) => ipcRenderer.invoke('context:lookup', hhmm),
+  contextClear: () => ipcRenderer.invoke('context:clear'),
+  onPalette: (cb) => ipcRenderer.on('palette:focus', () => cb()),
+  onGhci: (cb) => ipcRenderer.on('ghci:event', (_e, msg) => cb(msg))
+});

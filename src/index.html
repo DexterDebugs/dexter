@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>DEXTER</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- BOOT / BIG BANG -->
+<div id="boot">
+  <canvas id="bigbang"></canvas>
+  <div class="boot-inner">
+    <pre id="boot-log"></pre>
+    <div class="boot-title glitch" data-text="D E X T E R">D E X T E R</div>
+    <div class="boot-sub">PERSONAL OPERATIONS SYSTEM · v2.0</div>
+    <div class="boot-bar-track"><div id="boot-bar"></div></div>
+    <div class="boot-skip">CLICK TO SKIP SEQUENCE</div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+
+  <!-- TOP HUD -->
+  <header id="hud">
+    <div class="hud-left">
+      <div class="logo glitch" data-text="DEXTER">DEXTER</div>
+      <div class="hud-sub" id="hud-date"></div>
+    </div>
+    <div class="hud-center">
+      <div class="rank-line"><span id="rank-title">INITIATE</span> · LVL <span id="level-num">1</span></div>
+      <div class="xp-track"><div class="xp-fill" id="xp-fill"></div><div class="xp-spark"></div></div>
+      <div class="xp-label"><span id="xp-cur">0</span> / <span id="xp-next">100</span> XP</div>
+    </div>
+    <div class="hud-right">
+      <div id="clock">00:00:00</div>
+      <div id="voice-chip" class="voice-chip">◉ VOICE BOOTING</div>
+    </div>
+  </header>
+
+  <!-- FLOATING HEX DOCK -->
+  <nav id="dock">
+    <div class="dock-core"></div>
+    <button class="dock-btn active" data-view="dashboard" title="Command Center · Ctrl+1"><span>◈</span><i>CORE</i></button>
+    <button class="dock-btn" data-view="placement" title="Placement Sprint · Ctrl+2"><span>⌬</span><i>SPRINT</i></button>
+    <button class="dock-btn" data-view="training" title="The Forge · Ctrl+3"><span>▲</span><i>FORGE</i></button>
+    <button class="dock-btn" data-view="creative" title="Creative Lab · Ctrl+4"><span>✦</span><i>LAB</i></button>
+    <button class="dock-btn" data-view="reading" title="The Vault · Ctrl+5"><span>❐</span><i>VAULT</i></button>
+    <button class="dock-btn" data-view="quests" title="Quest Board · Ctrl+6"><span>⬡</span><i>QUESTS</i></button>
+    <button class="dock-btn" data-view="settings" title="Config · Ctrl+7"><span>⚙</span><i>SYS</i></button>
+    <button class="dock-btn" data-view="missions" title="Mission Control · Ctrl+8"><span>⟁</span><i>OPS</i></button>
+  </nav>
+
+  <!-- MAIN -->
+  <main id="main">
+
+    <section id="view-dashboard" class="view active">
+      <h1 class="view-title" data-text="COMMAND CENTER">COMMAND CENTER</h1>
+      <div class="grid dash-grid">
+        <div class="panel a-streaks">
+          <div class="panel-head">STREAK CORES</div>
+          <div id="streaks" class="streak-grid"></div>
+        </div>
+        <div class="panel p-radar a-radar">
+          <div class="panel-head">PENTAGON // AXIS MATRIX <span class="live-dot">● LIVE</span></div>
+          <div class="radar-stage">
+            <div id="radar-tilt" class="radar-tilt">
+              <canvas id="radar"></canvas>
+              <div class="radar-core">
+                <div class="rc-label">CORE SYNC</div>
+                <div class="rc-num" id="radar-sync">—</div>
+                <div class="rc-state">STABLE ▲</div>
+              </div>
+              <div id="radar-chips"></div>
+            </div>
+          </div>
+          <div id="radar-week" class="radar-week"></div>
+        </div>
+        <div class="panel a-quests">
+          <div class="panel-head">TODAY'S QUESTS</div>
+          <div id="dash-quests"></div>
+        </div>
+        <div class="panel a-lc">
+          <div class="panel-head">LEETCODE UPLINK</div>
+          <div id="lc-stats" class="lc-stats">NO UPLINK — set username in SYS</div>
+        </div>
+        <div class="panel a-feed">
+          <div class="panel-head">ACTIVITY FEED</div>
+          <div id="recent-logs" class="log-list"></div>
+        </div>
+        <div class="panel a-news">
+          <div class="panel-head">GLOBAL SIGNAL // TECH NEWS <span class="xp-hint" id="news-time"></span></div>
+          <div id="news-feed" class="news-feed">establishing uplink…</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-placement" class="view">
+      <h1 class="view-title" data-text="PLACEMENT SPRINT">PLACEMENT SPRINT</h1>
+      <nav class="axis-tabs">
+        <button class="tt active" data-tt="overview">◈ OVERVIEW</button>
+        <button class="tt" data-tt="dsa">⌬ DSA</button>
+        <button class="tt" data-tt="portfolio">⚙ PORTFOLIO</button>
+        <button class="tt" data-tt="corecs">🖥 CORE CS</button>
+        <button class="tt" data-tt="sysdesign">🏗 SYS DESIGN</button>
+        <button class="tt" data-tt="comms">🎙 COMMS</button>
+        <button class="tt" data-tt="blogs">📡 BLOGS</button>
+      </nav>
+      <div id="tracker-panel" class="hidden"></div>
+      <div id="sprint-overview" class="grid two-col">
+        <div class="panel">
+          <div class="panel-head">LOG SESSION <span class="xp-hint">+20 XP + time bonus</span></div>
+          <form id="form-daily">
+            <select name="axis" required></select>
+            <input name="activity" placeholder="what did you work on?" required />
+            <input name="minutes" type="number" min="1" placeholder="minutes" required />
+            <textarea name="notes" placeholder="observations (2-3 lines)"></textarea>
+            <button type="submit" class="btn">COMMIT LOG</button>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-head">WEEKLY AXIS RATING <span class="xp-hint">+50 XP</span></div>
+          <form id="form-rating"></form>
+        </div>
+        <div class="panel span2">
+          <div class="panel-head">AXIS TRAJECTORY</div>
+          <canvas id="trajectory" height="160"></canvas>
+        </div>
+        <div class="panel span2">
+          <div class="panel-head">SESSION HISTORY</div>
+          <div id="placement-logs" class="log-list tall"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-training" class="view">
+      <h1 class="view-title" data-text="THE FORGE">THE FORGE</h1>
+      <div class="grid two-col">
+        <div class="panel">
+          <div class="panel-head">LOG WORKOUT <span class="xp-hint">+40 XP</span></div>
+          <form id="form-workout">
+            <input name="title" placeholder="session title" required />
+            <textarea name="exercises" placeholder="one per line: Weighted Dips 3x8 @10kg" required></textarea>
+            <div class="row-flex">
+              <label>EFFORT</label>
+              <input name="effort" type="range" min="1" max="5" value="3" />
+            </div>
+            <textarea name="notes" placeholder="notes"></textarea>
+            <button type="submit" class="btn">COMMIT SESSION</button>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-head">SKILL TREE</div>
+          <div id="skill-tree" class="skill-list"></div>
+        </div>
+        <div class="panel span2">
+          <div class="panel-head">SESSION HISTORY</div>
+          <div id="workout-logs" class="log-list tall"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-creative" class="view">
+      <h1 class="view-title" data-text="CREATIVE LAB">CREATIVE LAB</h1>
+      <div class="grid two-col">
+        <div class="panel">
+          <div class="panel-head">LOG OUTPUT <span class="xp-hint">+20 XP / hour</span></div>
+          <form id="form-creative">
+            <select name="type">
+              <option value="video">VIDEO EDITING</option>
+              <option value="design">GRAPHIC DESIGN</option>
+            </select>
+            <input name="title" placeholder="project / piece" required />
+            <input name="hours" type="number" step="0.5" min="0.5" placeholder="hours" required />
+            <textarea name="notes" placeholder="notes"></textarea>
+            <button type="submit" class="btn">COMMIT</button>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-head">OUTPUT LOG</div>
+          <div id="creative-logs" class="log-list tall"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-reading" class="view">
+      <h1 class="view-title" data-text="THE VAULT">THE VAULT</h1>
+      <div class="grid two-col">
+        <div class="panel">
+          <div class="panel-head">ADD BOOK</div>
+          <form id="form-book">
+            <input name="title" placeholder="title" required />
+            <input name="author" placeholder="author" />
+            <input name="totalPages" type="number" min="1" placeholder="total pages" required />
+            <button type="submit" class="btn">ADD TO VAULT</button>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-head">LOG READING <span class="xp-hint">+1 XP / page</span></div>
+          <form id="form-read-session">
+            <select name="bookId" required></select>
+            <input name="pages" type="number" min="1" placeholder="pages read" required />
+            <input name="minutes" type="number" min="1" placeholder="minutes" />
+            <button type="submit" class="btn">COMMIT</button>
+          </form>
+        </div>
+        <div class="panel span2">
+          <div class="panel-head">SHELF</div>
+          <div id="bookshelf"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-quests" class="view">
+      <h1 class="view-title" data-text="QUEST BOARD">QUEST BOARD</h1>
+      <div class="grid two-col">
+        <div class="panel">
+          <div class="panel-head">DAILY QUESTS <span class="xp-hint">+25 XP each</span></div>
+          <div id="quest-list"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">ACHIEVEMENTS</div>
+          <div id="achievement-list" class="ach-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-missions" class="view">
+      <h1 class="view-title" data-text="MISSION CONTROL">MISSION CONTROL</h1>
+      <div class="grid two-col">
+        <div class="panel span2">
+          <div class="panel-head">ACTIVE MISSIONS <span class="xp-hint">+30 XP on completion</span></div>
+          <div id="mission-list"></div>
+        </div>
+        <div class="panel span2">
+          <div class="panel-head">NEW MISSION</div>
+          <form id="form-mission" class="mission-form">
+            <input name="title" placeholder="mission objective" required />
+            <select name="axis"></select>
+            <input name="due" type="date" />
+            <select name="priority">
+              <option value="1">P1 — CRITICAL</option>
+              <option value="2" selected>P2 — STANDARD</option>
+              <option value="3">P3 — LOW</option>
+            </select>
+            <button type="submit" class="btn">DEPLOY</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-settings" class="view">
+      <h1 class="view-title" data-text="SYSTEM CONFIG">SYSTEM CONFIG</h1>
+      <div class="grid two-col">
+        <div class="panel">
+          <div class="panel-head">CORE</div>
+          <form id="form-settings">
+            <label>LEETCODE USERNAME
+              <input name="leetcodeUsername" placeholder="username" />
+            </label>
+            <label class="row"><input type="checkbox" name="autostart" /> LAUNCH ON SYSTEM STARTUP</label>
+            <label class="row"><input type="checkbox" name="tts" checked /> VOICE RESPONSES (TTS)</label>
+            <label class="row"><input type="checkbox" name="dictate" checked /> DICTATION ENGINE (Ctrl+Alt+Space anywhere)</label>
+            <label>ANTHROPIC API KEY <small style="color:var(--dim)">(optional — conversational brain, preferred)</small>
+              <input name="anthropicKey" type="password" placeholder="sk-ant-…" />
+            </label>
+            <label>GEMINI API KEY <small style="color:var(--dim)">(optional — free tier works; used when no Anthropic key)</small>
+              <input name="geminiKey" type="password" placeholder="AIza…" />
+            </label>
+            <button type="submit" class="btn">SAVE CONFIG</button>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-head">NOTION UPLINK</div>
+          <form id="form-notion">
+            <label>INTEGRATION TOKEN
+              <input name="notionToken" type="password" placeholder="ntn_..." />
+            </label>
+            <small class="dim-note">Create an internal integration at notion.so/my-integrations, then share your Pentagon Tracker &amp; Calisthenics pages with it.</small>
+            <div class="row-flex">
+              <button type="button" class="btn half" id="btn-notion-pull">⇣ PULL</button>
+              <button type="button" class="btn half" id="btn-notion-push">⇡ PUSH TODAY</button>
+            </div>
+            <div id="notion-status" class="dim-note"></div>
+            <button type="submit" class="btn">SAVE TOKEN</button>
+          </form>
+        </div>
+        <div class="panel span2">
+          <div class="panel-head">MODULES — BRAIN · CALENDAR · CI SENTINEL · CONTEXT</div>
+          <form id="form-modules" class="modules-form">
+            <label>NOTES VAULT PATH <small style="color:var(--dim)">(folder of .md/.txt — Obsidian vault or Notion export)</small>
+              <div class="row-flex">
+                <input name="vaultPath" placeholder="D:\notes" style="flex:1" />
+                <button type="button" class="btn half" id="btn-reindex">⟳ REINDEX</button>
+              </div>
+            </label>
+            <div id="brain-status" class="dim-note">no index yet</div>
+            <label>CALENDAR .ICS URL <small style="color:var(--dim)">(Google Calendar → settings → secret iCal address)</small>
+              <input name="icsUrl" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics" />
+            </label>
+            <div class="row-flex">
+              <label style="flex:1">GITHUB REPO (owner/repo)
+                <input name="ghRepo" placeholder="user/floodgate" />
+              </label>
+              <label style="flex:1">GITHUB TOKEN
+                <input name="ghToken" type="password" placeholder="ghp_…" />
+              </label>
+            </div>
+            <label class="row"><input type="checkbox" name="contextLog" /> CONTEXT LOG — record active window titles every 30s (local only, 48h retention)</label>
+            <button type="submit" class="btn">SAVE MODULES</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- COMMAND BAR -->
+  <footer id="cmdbar">
+    <canvas id="waveform" width="80" height="30"></canvas>
+    <input id="cmd" placeholder='say "Hey Dexter" or type a command…' autocomplete="off" />
+    <button id="mic-btn" title="toggle voice engine">🎙</button>
+  </footer>
+
+  <!-- DEXTER COMMS DRAWER -->
+  <aside id="dexter-comms" class="collapsed">
+    <div class="comms-spine" title="open Dexter comms">
+      <span class="cs-glyph">◈</span>
+      <span class="cs-label">D E X T E R</span>
+      <span class="cs-dot"></span>
+    </div>
+    <div class="comms-head">
+      <span class="comms-title">DEXTER · COMMS</span>
+      <button id="comms-toggle" title="collapse">−</button>
+    </div>
+    <div id="comms-log"></div>
+  </aside>
+  <div id="toast-zone"></div>
+  <div id="levelup" class="hidden">
+    <div class="levelup-inner">
+      <div class="levelup-label">LEVEL UP</div>
+      <div class="levelup-num" id="levelup-num">2</div>
+      <div class="levelup-rank" id="levelup-rank"></div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script src="trackers/shared.js"></script>
+<script src="trackers/notion-sync.js"></script>
+<script src="trackers/panels.js"></script>
+<script src="commands/index.js"></script>
+</body>
+</html>
