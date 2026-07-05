@@ -9,6 +9,8 @@
 
 ### ▶ [Watch the 90-second demo](assets/dexter-demo.mp4)
 
+https://github.com/user-attachments/assets/a70e8876-82de-42e8-806c-48b7d306a7b2
+
 https://github.com/DexterDebugs/dexter/raw/main/assets/dexter-demo.mp4
 
 </div>
