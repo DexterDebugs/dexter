@@ -267,31 +267,62 @@ function httpJson(opts, body) {
 }
 
 /* ---------- LeetCode ---------- */
-async function fetchLeetCode(username) {
-  const body = JSON.stringify({
-    query: `query ($u: String!) {
-      matchedUser(username: $u) {
-        submitStatsGlobal { acSubmissionNum { difficulty count } }
-        userCalendar { streak totalActiveDays }
-      }
-    }`,
-    variables: { u: username }
-  });
-  const { json } = await httpJson({
+function lcQuery(body) {
+  return httpJson({
     hostname: 'leetcode.com', path: '/graphql', method: 'POST',
     headers: {
       'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body),
       'Referer': 'https://leetcode.com', 'User-Agent': 'Mozilla/5.0'
     }
   }, body);
+}
+
+// slug → difficulty cache so repeated syncs don't re-fetch known problems
+const lcDiffCache = new Map();
+async function lcDifficulty(slug) {
+  if (lcDiffCache.has(slug)) return lcDiffCache.get(slug);
+  try {
+    const { json } = await lcQuery(JSON.stringify({
+      query: `query ($s: String!) { question(titleSlug: $s) { difficulty } }`,
+      variables: { s: slug }
+    }));
+    const diff = ((json.data || {}).question || {}).difficulty || 'Medium';
+    lcDiffCache.set(slug, diff);
+    return diff;
+  } catch { return 'Medium'; }
+}
+
+async function fetchLeetCode(username) {
+  const { json } = await lcQuery(JSON.stringify({
+    query: `query ($u: String!) {
+      matchedUser(username: $u) {
+        submitStatsGlobal { acSubmissionNum { difficulty count } }
+        userCalendar { streak totalActiveDays }
+      }
+      recentAcSubmissionList(username: $u, limit: 20) { title titleSlug timestamp }
+    }`,
+    variables: { u: username }
+  }));
   const mu = json.data && json.data.matchedUser;
   if (!mu) throw new Error('user not found');
   const nums = mu.submitStatsGlobal.acSubmissionNum;
   const get = d => (nums.find(n => n.difficulty === d) || {}).count || 0;
+
+  // enrich recent accepted submissions with difficulty (cached per slug)
+  const rawRecent = (json.data.recentAcSubmissionList || []);
+  const recent = await Promise.all(rawRecent.map(async r => ({
+    title: r.title,
+    slug: r.titleSlug,
+    ts: parseInt(r.timestamp) * 1000,
+    date: new Date(parseInt(r.timestamp) * 1000).toISOString().slice(0, 10),
+    difficulty: await lcDifficulty(r.titleSlug)
+  })));
+
   return {
     total: get('All'), easy: get('Easy'), medium: get('Medium'), hard: get('Hard'),
     streak: mu.userCalendar ? mu.userCalendar.streak : 0,
     activeDays: mu.userCalendar ? mu.userCalendar.totalActiveDays : 0,
+    recent,
     fetchedAt: new Date().toISOString()
   };
 }

@@ -49,10 +49,18 @@ const TrackerPanels = {
           <div class="panel-head">TOPIC MATRIX <span class="xp-hint">click to cycle status</span></div>
           ${trackerMatrix(T.topics, true)}
         </div>
-        <div class="panel span2">
+        <div class="panel">
+          <div class="panel-head">RECENT SOLVES <span class="xp-hint">auto-tracked from LeetCode</span></div>
+          <div class="log-list tall">${[...(T.problems || [])].sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 20)
+            .map(p => {
+              const dc = { Easy: 'easy', Medium: 'med', Hard: 'hard' }[p.difficulty] || 'med';
+              return `<div class="log-item"><span class="date">${(p.date || '').slice(5)}</span><span class="tag ${dc}">${(p.difficulty || '?')[0]}</span><span>${p.title}</span></div>`;
+            }).join('') || '<div class="dim-note">no solves tracked yet — sync LeetCode to start</div>'}</div>
+        </div>
+        <div class="panel">
           <div class="panel-head">DSA SESSION LOG</div>
-          <div class="log-list tall">${(DB.dailyLogs || []).filter(l => l.axis === 'DSA').reverse().slice(0, 25)
-            .map(l => logLine('DSA', l.date, `${l.activity}${l.minutes ? ` (${l.minutes}m)` : ''}`)).join('') || 'no sessions'}</div>
+          <div class="log-list tall">${(DB.dailyLogs || []).filter(l => l.axis === 'DSA').reverse().slice(0, 20)
+            .map(l => logLine(l._auto === 'leetcode' ? 'AUTO' : 'DSA', l.date, `${l.activity}${l.minutes ? ` (${l.minutes}m)` : ''}`)).join('') || 'no sessions'}</div>
         </div>
       </div>`;
   },

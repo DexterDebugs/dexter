@@ -995,9 +995,67 @@ function renderLeetCode() {
 async function refreshLeetCode(username, silent) {
   try {
     DB.leetcode = await window.dexter.fetchLeetCode(username);
-    renderLeetCode(); checkAchievements();
-    if (!silent) say(`LeetCode synced. ${DB.leetcode.total} problems solved.`);
+    const summary = reconcileLeetCode(DB.leetcode);   // auto-log new solves → streak + XP
+    renderLeetCode(); checkAchievements(); renderAll();
+    if (!silent) {
+      say(summary.newCount
+        ? `LeetCode synced. ${summary.newCount} new ${summary.newCount === 1 ? 'problem' : 'problems'} today — ${summary.xp} XP. ${DB.leetcode.total} solved total.`
+        : `LeetCode synced. ${DB.leetcode.total} solved. Nothing new since last check.`);
+    }
   } catch { if (!silent) { sfx.error(); say('LeetCode uplink failed. Check the username or connection.'); } }
+}
+
+/* Auto-tracker (TRACKERS.md T-A2): diff recent accepted submissions against what
+   we've already recorded, log genuinely-new solves, feed streak + XP by difficulty.
+   Difficulty XP: Easy 12 · Medium 22 · Hard 45. */
+const LC_XP = { Easy: 12, Medium: 22, Hard: 45 };
+const LC_MIN = { Easy: 15, Medium: 25, Hard: 40 };
+function reconcileLeetCode(stats) {
+  const T = (DB.trackers = DB.trackers || {}).dsa = DB.trackers.dsa || { topics: [], problems: [] };
+  T.problems = T.problems || [];
+  const recent = stats.recent || [];
+  const seen = new Set(T.problems.map(p => p.slug + '|' + p.date));
+
+  // First-ever reconcile: adopt existing recent history as baseline WITHOUT retroactive
+  // XP/streak for past days — but still credit anything solved *today*.
+  const firstInit = !T.autoInit;
+  const todayStr = today();
+  const fresh = [];
+  for (const r of recent) {
+    const key = r.slug + '|' + r.date;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const credit = !firstInit || r.date === todayStr;   // baseline old days silently
+    T.problems.push({ slug: r.slug, title: r.title, difficulty: r.difficulty, date: r.date, ts: r.ts, credited: credit });
+    if (credit) fresh.push(r);
+  }
+  T.autoInit = true;
+
+  // group fresh solves by date → upsert one auto daily-log per day, award XP
+  let totalXp = 0, newCount = 0;
+  const byDate = {};
+  fresh.forEach(r => (byDate[r.date] = byDate[r.date] || []).push(r));
+  for (const [date, probs] of Object.entries(byDate)) {
+    // all problems recorded for this date (auto), for an accurate rolling count/label
+    const dayProbs = T.problems.filter(p => p.date === date);
+    const titles = dayProbs.map(p => p.title);
+    const mins = dayProbs.reduce((s, p) => s + (LC_MIN[p.difficulty] || 25), 0);
+    let log = DB.dailyLogs.find(l => l.date === date && l._auto === 'leetcode');
+    const activity = `Solved ${dayProbs.length} LeetCode ${dayProbs.length === 1 ? 'problem' : 'problems'}: ${titles.slice(0, 8).join(', ')}${titles.length > 8 ? '…' : ''}`;
+    if (log) { log.activity = activity; log.minutes = mins; }
+    else DB.dailyLogs.push({ date, axis: 'DSA', activity, minutes: mins, notes: '', _auto: 'leetcode' });
+    // XP only for the newly-credited problems this pass
+    const xp = probs.reduce((s, p) => s + (LC_XP[p.difficulty] || 22), 0);
+    totalXp += xp; newCount += probs.length;
+  }
+
+  T.lastSync = new Date().toISOString();
+  T.loggedProblemCount = T.problems.length;
+  if (newCount) {
+    grantXp(totalXp, `${newCount} LeetCode ${newCount === 1 ? 'solve' : 'solves'} auto-tracked`);
+  }
+  save(); // persist problems[], the auto daily-log, and any XP grantXp added
+  return { newCount, xp: totalXp };
 }
 
 function logLine(tag, date, text, xp) {
@@ -1520,6 +1578,10 @@ async function boot() {
   initDictate();
   if (window.initExtras) initExtras();
   setInterval(() => loadNews(true), 60 * 60 * 1000); // refresh signal hourly
+  // auto-track LeetCode solves every 20 min (silent) so streak + XP stay live
+  setInterval(() => {
+    if (DB.settings.leetcodeUsername) refreshLeetCode(DB.settings.leetcodeUsername, true);
+  }, 20 * 60 * 1000);
 }
 
 boot();

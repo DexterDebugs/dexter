@@ -367,6 +367,17 @@ window.COMMAND_REGISTRY = [
     }
   },
   {
+    name: 'solved-today',
+    test: t => /^(what did i solve today|solves today|problems today|today'?s solves)$/.test(t) ? [t] : null,
+    run: () => {
+      const probs = (DB.trackers.dsa.problems || []).filter(p => p.date === today());
+      if (!probs.length) return say("No LeetCode solves tracked today yet. Solve one and I'll pick it up on the next sync.");
+      const byDiff = probs.reduce((a, p) => (a[p.difficulty] = (a[p.difficulty] || 0) + 1, a), {});
+      const mix = Object.entries(byDiff).map(([d, n]) => `${n} ${d.toLowerCase()}`).join(', ');
+      say(`${probs.length} today — ${mix}. ${probs.slice(0, 5).map(p => p.title).join(', ')}${probs.length > 5 ? ', and more' : ''}.`);
+    }
+  },
+  {
     name: 'dsa-gaps',
     test: t => /^what topics am i missing|missing topics$/.test(t) ? [t] : null,
     run: () => {
